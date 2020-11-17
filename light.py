@@ -57,7 +57,7 @@ class LightInteractor:
     # `_waiting_time_seconds` seconds
     _waiting_time_seconds = 0.200
 
-    def __init__(self, schedule, log="/home/pi/data_log.csv", pins: typing.List = None, testing: bool = False):
+    def __init__(self, schedule, log="/root/data_log.csv", pins: typing.List = None, testing: bool = False):
         self._log = log
         self._pin_ids = pins
         self._schedule = schedule
@@ -117,18 +117,16 @@ class LightInteractor:
         duration, intensity, index = self._schedule[stimulus]
         file = open(self._log, "a")
         file.write(f"\n\nstimulus_{index}:\n")
-        file.write(now+"\n")
+        file.write(stimulus+"\n")
         file.write("duration:"+str(duration)+"_intensity:"+str(intensity)+"\n")
 
         return 0
 
     def run(self):
         while True:
-            print("Iteration")
             try:
                 now = get_timestamp()
-                # if now in self._schedule:
-                if True:
+                if now in self._schedule:
                     logger.info("Interacting")
                     self.interact(now)
                     self.save(now)
@@ -156,6 +154,8 @@ if __name__ == "__main__":
         get_timestamp(10): (2, 1, 0),
         get_timestamp(15): (3, 1, 0),
     }
+
+    print(schedule)
     interactor = LightInteractor(schedule, pins=[27])
     interactor.run()
 
