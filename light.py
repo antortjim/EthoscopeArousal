@@ -81,7 +81,7 @@ class LightInteractor:
                 duration, intensity, index = self._schedule[stimulus]
 
                 for pin in pins:
-                        pin.start(0)
+sss                       pin.start(0)
                 
                 print("stimulus")
                 for pin in pins:
@@ -101,8 +101,8 @@ class LightInteractor:
                 """
 
                 if stimulus not in self._schedule:
-                        logger.warning("%s is not an interaction in the schedule", stimulus)
-                        return 1
+                    logger.warning("%s is not an interaction in the schedule", stimulus)
+                    return 1
 
 
                 duration, intensity, index = self._schedule[stimulus]
@@ -114,28 +114,33 @@ class LightInteractor:
                 return 0
 
         def run(self):
-                try:
-                    while True:
+                while True:
+                    print("Iteration")
+                    try:
                         now = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
-                        if now in self._schedule: 
+    #                   if now in self._schedule: 
+                        if True:
+                            logger.info("Interacting")
                             self.interact(now)
                             self.save(now)
                             time.sleep(self._waiting_time_seconds) 
-                                
-                # trap a CTRL+C keyboard interrupt
-                except KeyboardInterrupt:
-                        # resets all GPIO ports used by this program
-                        GPIO.cleanup()
+                                    
+                    # trap a CTRL+C keyboard interrupt
+                    except KeyboardInterrupt:
+                            logger.info("Exiting...")
+                            # resets all GPIO ports used by this program
+                            GPIO.cleanup()
+                            return 0
+    
+                    except Exception as error:
+                            GPIO.cleanup()
+                            logger.error(error)
+                            return 1
 
-                except Exception as error:
-                        GPIO.cleanup()
-                        logger.error(error)
-                        return 1
-
-                finally:
-                        return 0
-
-
+                return 0
+    
+    
+    
 
 if __name__ == "__main__":
         interactor = LightInteractor(pins=[27])
