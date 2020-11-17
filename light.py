@@ -5,8 +5,8 @@ import typing
 from threading import Thread
 import RPi.GPIO as GPIO
 
+import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 duration_1 = 1
 intensity_1 = 0.01
@@ -55,15 +55,14 @@ class LightInteractor(Thread):
 
     # check what the time is every
     # `_waiting_time_seconds` seconds
-    _waiting_time_seconds = 0.200
-    DAEMON = True
+    _waiting_time_seconds = 0.5
+    DAEMON = False
 
 
     def __init__(self, schedule, *args, log="/root/data_log.csv", pins: typing.List = None, **kwargs):
         self._log = log
         self._pin_ids = pins
         self._schedule = schedule
-        self._testing = testing
 
         if pins is not None:
             self._pin_ids = pins
@@ -135,8 +134,8 @@ class LightInteractor(Thread):
                     logger.info("Interacting")
                     self.interact(now)
                     self.save(now)
-                    time.sleep(self._waiting_time_seconds)
 
+                time.sleep(self._waiting_time_seconds)
             # trap a CTRL+C keyboard interrupt
             except KeyboardInterrupt:
                     logger.info("Exiting...")
