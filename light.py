@@ -30,116 +30,113 @@ stimulus_4 = "2021:02:12-02:16:00"
 #stimulus_4 = "2019:07:17-15:36:06"
 
 pins = [17, 27, 4]
-	
+        
 class LightInteractor:
 
-	# check what the time is every
-	# `_waiting_time_seconds` seconds
-	_waiting_time_seconds = 0.200
+        # check what the time is every
+        # `_waiting_time_seconds` seconds
+        _waiting_time_seconds = 0.200
 
-	# Write here your own schedule
-	# You can use the code before class LightInteractor
-	# to provide the data
-	_schedule = {
-		stimulus_1: (duration_1, intensity_1, 1),
-		stimulus_2: (duration_2, intensity_2, 2),
-		stimulus_3: (duration_3, intensity_3, 3),
-		stimulus_4: (duration_4, intensity_4, 4),
+        # Write here your own schedule
+        # You can use the code before class LightInteractor
+        # to provide the data
+        _schedule = {
+                stimulus_1: (duration_1, intensity_1, 1),
+                stimulus_2: (duration_2, intensity_2, 2),
+                stimulus_3: (duration_3, intensity_3, 3),
+                stimulus_4: (duration_4, intensity_4, 4),
 
-	}
+        }
 
-	def __init__(self, log="/home/pi/data_log.csv", pins: typing.List = None):
-		self._log = log
-		self._pin_ids = pins
+        def __init__(self, log="/home/pi/data_log.csv", pins: typing.List = None):
+                self._log = log
+                self._pin_ids = pins
 
-		if pins is not None:
-			self._pin_ids = pins
+                if pins is not None:
+                        self._pin_ids = pins
 
-		self._pins = [None for p in self._pin_ids]
-		GPIO.setmode(GPIO.BCM) 
+                self._pins = [None for p in self._pin_ids]
+                GPIO.setmode(GPIO.BCM) 
 
-		for i, p in enumerate(self._pin_ids):
-			GPIO.setup(p, GPIO.OUT, initial=GPIO.LOW)
-			GPIO.output(p, GPIO.LOW)
-			 # Create a PWM object
-			self._pins[i] = GPIO.PWM(p, 100)
-
-
-	def interact(self, stimulus: str):
-		"""
-		For every pin in self._pins
-		* Turn it off
-		* Turn it on with an intensity and for a duration
-		as given by the schedule
-		* Turn them off
-
-		This is done simultaneously (+- ms) for all pins
-		"""
-
-		pins = self._pins
-		
-		duration, intensity, index = self._schedule[stimulus]
-
-		for pin in pins:
-			pin.start(0)
-		
-		print("stimulus")
-		for pin in pins:
-			pin.ChangeDutyCycle(intensity)
-
-		time.sleep(duration)
-
-		for pin in pins:
-			pin.stop()
-
-		return 0
-		
-	def save(self, stimulus: str):
-		"""
-		Log the interaction saved in the self._schedule dictionary
-		with key given by stimulus 
-		"""
-
-		if stimulus not in self._schedule:
-			logger.warning("%s is not an interaction in the schedule", stimulus)
-			return 1
+                for i, p in enumerate(self._pin_ids):
+                        GPIO.setup(p, GPIO.OUT, initial=GPIO.LOW)
+                        GPIO.output(p, GPIO.LOW)
+                         # Create a PWM object
+                        self._pins[i] = GPIO.PWM(p, 100)
 
 
-		duration, intensity, index = self._schedule[stimulus]
-		file = open(self._log, "a")
-		file.write(f"\n\nstimulus_{index}:\n")
-		file.write(now+"\n")
-		file.write("duration:"+str(duration)+"_intensity:"+str(intensity)+"\n")
-		
-		return 0
+        def interact(self, stimulus: str):
+                """
+                For every pin in self._pins
+                * Turn it off
+                * Turn it on with an intensity and for a duration
+                as given by the schedule
+                * Turn them off
 
-	def run(self):
-		try:
-	        while True:
-				now = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
-				print(now)
+                This is done simultaneously (+- ms) for all pins
+                """
 
-				if now in schedule: 
-					self.interact(now)
-					self.save(now)
+                pins = self._pins
+                
+                duration, intensity, index = self._schedule[stimulus]
 
-				time.sleep(self._waiting_time_seconds) 
-				
-		# trap a CTRL+C keyboard interrupt
-		except KeyboardInterrupt:
-			# resets all GPIO ports used by this program
-			GPIO.cleanup()
+                for pin in pins:
+                        pin.start(0)
+                
+                print("stimulus")
+                for pin in pins:
+                        pin.ChangeDutyCycle(intensity)
 
-		except Exception as error:
-			GPIO.cleanup()
-			logger.error(error)
-			return 1
+                time.sleep(duration)
 
-		finally:
-			return 0
+                for pin in pins:
+                        pin.stop()
+
+                return 0
+                
+        def save(self, stimulus: str):
+                """
+                Log the interaction saved in the self._schedule dictionary
+                with key given by stimulus 
+                """
+
+                if stimulus not in self._schedule:
+                        logger.warning("%s is not an interaction in the schedule", stimulus)
+                        return 1
+
+
+                duration, intensity, index = self._schedule[stimulus]
+                file = open(self._log, "a")
+                file.write(f"\n\nstimulus_{index}:\n")
+                file.write(now+"\n")
+                file.write("duration:"+str(duration)+"_intensity:"+str(intensity)+"\n")
+                
+                return 0
+
+        def run(self):
+                try:
+                    while True:
+                        now = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+                        if now in schedule: 
+                            self.interact(now)
+                            self.save(now)
+                            time.sleep(self._waiting_time_seconds) 
+                                
+                # trap a CTRL+C keyboard interrupt
+                except KeyboardInterrupt:
+                        # resets all GPIO ports used by this program
+                        GPIO.cleanup()
+
+                except Exception as error:
+                        GPIO.cleanup()
+                        logger.error(error)
+                        return 1
+
+                finally:
+                        return 0
 
 
 
 if __name__ == "__main__":
-	interactor = LightInteractor(pins=[27])
-	interactor.run()
+        interactor = LightInteractor(pins=[27])
+        interactor.run()
