@@ -5,6 +5,8 @@ __maintainer__ = "antonio.ortega@kuleuven.be"
 __status__ = "Production"
 
 import subprocess
+from threading import Thread
+
 import smtplib
 from email.mime.text import MIMEText
 import datetime
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class EmailWriter:
+class EmailWriter(Thread):
     """
     Send email messages from a specified address to another address
     using some predefined template
@@ -21,11 +23,14 @@ class EmailWriter:
 
     _subject_t = "IPs For RaspberryPi on %s"
     _message_t = "Hi Natalie. I am testing my package.\n Please confirm you received this message.\nYour %s ip is %s"
+    DAEMON = True
 
-    def __init__(self, from_user='RPi.PAVE@kuleuven.be', to_user=['natalie.kaempf@kuleuven.vib.be']):
+    def __init__(self, *args, from_user='RPi.PAVE@kuleuven.be', to_user=['natalie.kaempf@kuleuven.vib.be'], **kwargs):
         self._from_user = from_user
         self._to_user = to_user
         self._smtpserver = smtplib.SMTP('smtp.kuleuven.be', 25) # Server to use.
+        super().__init__(*args, **kwargs)
+        self.setDaemon(self.DAEMON)
     
     @property
     def smtpserver(self):
@@ -110,7 +115,17 @@ class EmailWriter:
         # Close the smtp server.
         self.smtpserver.quit()
 
+    def run(self):
+        while True:
+            try:
+                self.send()
+                time.sleep(60*60)
+            except KeyboardInterrupt:
+                break
+
+        self.close()
+
+
 if __name__ == "__main__":
     writer = EmailWriter(from_user='RPi.PAVE@kuleuven.be', to_user=['natalie.kaempf@kuleuven.vib.be'])
-    writer.send()
-    writer.close()
+    writer.start()

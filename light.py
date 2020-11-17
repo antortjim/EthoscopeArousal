@@ -2,7 +2,7 @@ import datetime
 import time
 import logging
 import typing
-
+from threading import Thread
 import RPi.GPIO as GPIO
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def get_timestamp(offset=0):
     timestamp = (datetime.datetime.now()+datetime.timedelta(seconds=offset)).strftime("%Y:%m:%d-%H:%M:%S")
     return timestamp
 
-class LightInteractor:
+class LightInteractor(Thread):
     """
     Run a schedule which specifies a set of timepoints as key
     and an intensity and duration as value
@@ -56,8 +56,10 @@ class LightInteractor:
     # check what the time is every
     # `_waiting_time_seconds` seconds
     _waiting_time_seconds = 0.200
+    DAEMON = True
 
-    def __init__(self, schedule, log="/root/data_log.csv", pins: typing.List = None, testing: bool = False):
+
+    def __init__(self, schedule, *args, log="/root/data_log.csv", pins: typing.List = None, **kwargs):
         self._log = log
         self._pin_ids = pins
         self._schedule = schedule
@@ -75,6 +77,9 @@ class LightInteractor:
             # Create a PWM object
             self._pins[i] = GPIO.PWM(p, 100)
 
+        
+        super().__init__(*args, **kwargs)
+        self.setDaemon(self.DAEMON)
 
     def interact(self, stimulus: str):
         """
@@ -157,5 +162,5 @@ if __name__ == "__main__":
 
     print(schedule)
     interactor = LightInteractor(schedule, pins=[27])
-    interactor.run()
+    interactor.start()
 
