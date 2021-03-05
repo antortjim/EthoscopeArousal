@@ -47,8 +47,7 @@ class EmailWriter:
 
         return con_type
 
-    @staticmethod
-    def get_message():
+    def get_message(self):
         """
         Generate a string reporting the ip address
         and type of connection of the RPi
@@ -64,21 +63,22 @@ class EmailWriter:
         split_line = ip_lines[1].split()
 
         # con_type variables for the message text. ex) 'ethernet', 'wifi', etc.
-        iptype = connect_type(split_line)
+        iptype = self.connect_type(split_line)
 
         """Because the text 'src' is always followed by an ip address,
         we can use the 'index' function to find 'src' and add one to
         get the index position of our ip.
         """
+        split_line = [e.decode() for e in split_line]
         ipaddr = split_line[split_line.index('src')+1]
 
         # Complete the message template with the obtained ip type and address
-        message = self._message_t % iptype, ipaddr
+        message = self._message_t % (iptype, ipaddr)
         logger.info(message)
         return message
     
     def write(self):
-        message = get_message()
+        message = self.get_message()
 
         # Creates the text, subject, 'from', and 'to' of the message.
         msg = MIMEText(message)
@@ -104,9 +104,9 @@ class EmailWriter:
         # Write the message
         msg = self.write()
         # Send the message
-        self.smtpserver.sendmail(self._from_user, to, msg.as_string())
+        self.smtpserver.sendmail(self._from_user, self._to_user, msg.as_string())
     
-    def close(self)
+    def close(self):
         # Close the smtp server.
         self.smtpserver.quit()
 
