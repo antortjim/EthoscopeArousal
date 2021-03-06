@@ -117,7 +117,7 @@ class LightInteractor:
                 try:
                     while True:
                         now = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
-                        if now in schedule: 
+                        if now in self._schedule: 
                             self.interact(now)
                             self.save(now)
                             time.sleep(self._waiting_time_seconds) 
