@@ -42,13 +42,20 @@ schedule = {
 
 }
 
+def get_timestamp(offset=0):
+	timestamp = (datetime.datetime.now()+offset).strftime("%Y:%m:%d-%H:%M:%S")
+	return timestamp
+
 class LightInteractor:
+	"""
+	Run a schedule which specifies a set of timepoints as key
+	and an intensity and duration as value
+	The timepoint has resolution up to 1 second
+	"""
 
 	# check what the time is every
 	# `_waiting_time_seconds` seconds
 	_waiting_time_seconds = 0.200
-
-
 
 	def __init__(self, schedule, log="/home/pi/data_log.csv", pins: typing.List = None, testing: bool = False):
 		self._log = log
@@ -80,17 +87,13 @@ class LightInteractor:
 		This is done simultaneously (+- ms) for all pins
 		"""
 
-		pins = self._pins
+        pins = self._pins
 		
-		if not self._testing:
-			duration, intensity, index = self._schedule[stimulus]
-		else:
-			duration, intensity, index = 5, 1, 0
-
+        duration, intensity, index = self._schedule[stimulus]
+		
 		for pin in pins:
 			pin.start(0)
 		
-		print("stimulus")
 		for pin in pins:
 			pin.ChangeDutyCycle(intensity)
 
@@ -124,7 +127,7 @@ class LightInteractor:
 		while True:
 			print("Iteration")
 			try:
-				now = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+				now = get_timestamp()
                 # if now in self._schedule: 
 				if True:
 					logger.info("Interacting")
@@ -147,8 +150,12 @@ class LightInteractor:
 		return 0
     
     
-    
-
 if __name__ == "__main__":
-        interactor = LightInteractor(schedule, pins=[27], testing=True)
-        interactor.run()
+	
+	schedule = {
+		get_timestamp(5): (1, 1, 0),
+		get_timestamp(10): (2, 1, 0),
+		get_timestamp(15): (3, 1, 0),	
+	}
+    interactor = LightInteractor(schedule, pins=[27])
+    interactor.run()
