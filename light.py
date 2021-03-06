@@ -30,27 +30,31 @@ stimulus_4 = "2021:02:12-02:16:00"
 #stimulus_4 = "2019:07:17-15:36:06"
 
 pins = [17, 27, 4]
-        
+
+# Write here your own schedule
+# You can use the code before class LightInteractor
+# to provide the data
+schedule = {
+	stimulus_1: (duration_1, intensity_1, 1),
+	stimulus_2: (duration_2, intensity_2, 2),
+	stimulus_3: (duration_3, intensity_3, 3),
+	stimulus_4: (duration_4, intensity_4, 4),
+
+}
+
 class LightInteractor:
 
 	# check what the time is every
 	# `_waiting_time_seconds` seconds
 	_waiting_time_seconds = 0.200
 
-	# Write here your own schedule
-	# You can use the code before class LightInteractor
-	# to provide the data
-	_schedule = {
-		stimulus_1: (duration_1, intensity_1, 1),
-		stimulus_2: (duration_2, intensity_2, 2),
-		stimulus_3: (duration_3, intensity_3, 3),
-		stimulus_4: (duration_4, intensity_4, 4),
 
-	}
 
-	def __init__(self, log="/home/pi/data_log.csv", pins: typing.List = None):
+	def __init__(self, schedule, log="/home/pi/data_log.csv", pins: typing.List = None, testing: bool = False):
 		self._log = log
 		self._pin_ids = pins
+		self._schedule = schedule
+		self._testing = testing
 
 		if pins is not None:
 			self._pin_ids = pins
@@ -78,7 +82,10 @@ class LightInteractor:
 
 		pins = self._pins
 		
-		duration, intensity, index = self._schedule[stimulus]
+		if not testing:
+			duration, intensity, index = self._schedule[stimulus]
+		else:
+			duration, intensity, index = 5, 1, 0
 
 		for pin in pins:
 			pin.start(0)
@@ -143,5 +150,5 @@ class LightInteractor:
     
 
 if __name__ == "__main__":
-        interactor = LightInteractor(pins=[27])
+        interactor = LightInteractor(pins=[27], testing=True)
         interactor.run()
