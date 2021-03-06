@@ -150,5 +150,5 @@ class LightInteractor:
     
 
 if __name__ == "__main__":
-        interactor = LightInteractor(pins=[27], testing=True)
+        interactor = LightInteractor(schedule, pins=[27], testing=True)
         interactor.run()
