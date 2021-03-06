@@ -82,7 +82,7 @@ class LightInteractor:
 
 		pins = self._pins
 		
-		if not testing:
+		if not self._testing:
 			duration, intensity, index = self._schedule[stimulus]
 		else:
 			duration, intensity, index = 5, 1, 0
