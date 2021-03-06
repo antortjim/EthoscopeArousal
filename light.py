@@ -1,6 +1,8 @@
 import datetime 
 import time 
 import logging
+import typing
+
 import RPi.GPIO as GPIO 
 
 logger = logging.getLogger(__name__)
@@ -31,8 +33,6 @@ pins = [17, 27, 4]
 	
 class LightInteractor:
 
-    _pin_ids = pins
-
 	# check what the time is every
 	# `_waiting_time_seconds` seconds
 	_waiting_time_seconds = 0.200
@@ -48,8 +48,13 @@ class LightInteractor:
 
 	}
 
-	def __init__(self, log="/home/pi/data_log.csv"):
+	def __init__(self, log="/home/pi/data_log.csv", pins: typing.List = None):
 		self._log = log
+		self._pin_ids = pins
+
+		if pins is not None:
+			self._pin_ids = pins
+
 		self._pins = [None for p in self._pin_ids]
 		GPIO.setmode(GPIO.BCM) 
 
@@ -133,3 +138,8 @@ class LightInteractor:
 		finally:
 			return 0
 
+
+
+if __name__ == "__main__":
+	interactor = LightInteractor(pins=[27])
+	interactor.run()
