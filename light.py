@@ -43,7 +43,7 @@ schedule = {
 }
 
 def get_timestamp(offset=0):
-    timestamp = (datetime.datetime.now()+datetime.timedelta(offset)).strftime("%Y:%m:%d-%H:%M:%S")
+    timestamp = (datetime.datetime.now()+datetime.timedelta(seconds=offset)).strftime("%Y:%m:%d-%H:%M:%S")
     return timestamp
 
 class LightInteractor:
