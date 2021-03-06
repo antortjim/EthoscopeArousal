@@ -56,6 +56,8 @@ class LightInteractor(Thread):
     # check what the time is every
     # `_waiting_time_seconds` seconds
     _waiting_time_seconds = 0.200
+    DAEMON = True
+
 
     def __init__(self, schedule, *args, log="/home/pi/data_log.csv", pins: typing.List = None, testing: bool = False, **kwargs):
         self._log = log
@@ -77,7 +79,7 @@ class LightInteractor(Thread):
 
         
         super().__init__(*args, **kwargs)
-
+        self.setDaemon(self.DAEMON)
 
     def interact(self, stimulus: str):
         """

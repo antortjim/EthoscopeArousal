@@ -23,12 +23,14 @@ class EmailWriter(Thread):
 
     _subject_t = "IPs For RaspberryPi on %s"
     _message_t = "Hi Natalie. I am testing my package.\n Please confirm you received this message.\nYour %s ip is %s"
+    DAEMON = True
 
     def __init__(self, *args, from_user='RPi.PAVE@kuleuven.be', to_user=['natalie.kaempf@kuleuven.vib.be'], **kwargs):
         self._from_user = from_user
         self._to_user = to_user
         self._smtpserver = smtplib.SMTP('smtp.kuleuven.be', 25) # Server to use.
         super().__init__(*args, **kwargs)
+        self.setDaemon(self.DAEMON)
     
     @property
     def smtpserver(self):
